@@ -1,6 +1,5 @@
-import asyncio, time, random
+import random
 from playwright.async_api import async_playwright
-from app.data_exporters import FileSaver
 
 def search_query(sentence: str):
     return sentence.strip().replace(' ', '+')
