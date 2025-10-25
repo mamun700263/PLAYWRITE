@@ -1,7 +1,8 @@
 import io, csv, json, pandas as pd
 from typing import List, Dict
 
-from ...app.data_exporters import FileSaver
+from core.data_exporters import FileSaver
+
 
 class InMemoryExporter:
 

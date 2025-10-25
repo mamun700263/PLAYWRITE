@@ -7,7 +7,7 @@ from gspread_dataframe import set_with_dataframe, get_as_dataframe
 from oauth2client.service_account import ServiceAccountCredentials
 
 from dotenv import load_dotenv
-from ...app import Logger
+from core import Logger
 
 # Load environment variables
 load_dotenv()
@@ -25,7 +25,7 @@ class GoogleSheetPusher:
 
         self.scope = [
             "https://www.googleapis.com/auth/spreadsheets",
-            "https://www.googleapis.com/auth/drive"
+            "https://www.googleapis.com/auth/drive",
         ]
 
         if not self.creds_file or not os.path.exists(self.creds_file):
@@ -59,7 +59,9 @@ class GoogleSheetPusher:
             return self.sheet.worksheet(sheet_name)
         except gspread.WorksheetNotFound:
             logger.info(f"➕ Creating worksheet: {sheet_name}")
-            return self.sheet.add_worksheet(title=sheet_name, rows=str(rows), cols=str(cols))
+            return self.sheet.add_worksheet(
+                title=sheet_name, rows=str(rows), cols=str(cols)
+            )
 
     def push_dataframe(self, df: pd.DataFrame, sheet_name: str, clear=True):
         try:
@@ -109,7 +111,9 @@ class GoogleSheetPusher:
     def read_sheet_as_df(self, sheet_name: str) -> Optional[pd.DataFrame]:
         try:
             ws = self._get_or_create_sheet(sheet_name)
-            df = get_as_dataframe(ws, evaluate_formulas=True, dtype=str).dropna(how="all")
+            df = get_as_dataframe(ws, evaluate_formulas=True, dtype=str).dropna(
+                how="all"
+            )
             logger.info(f"📥 Sheet '{sheet_name}' read into DataFrame.")
             return df
         except Exception as e:

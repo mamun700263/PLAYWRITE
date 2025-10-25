@@ -2,8 +2,10 @@ import time
 import requests
 from requests.exceptions import Timeout, ConnectionError, RequestException
 
-from ...app import Logger
-logger = Logger.get_logger(__name__,'Data Exporters')
+from core import Logger
+
+logger = Logger.get_logger(__name__, "Data Exporters")
+
 
 class ApiPoster:
     @staticmethod
@@ -28,7 +30,9 @@ class ApiPoster:
                     logger.info(f"✅ POST success on attempt {attempt}")
                     return True
                 else:
-                    logger.warning(f"⚠️ Attempt {attempt} failed: {res.status_code} - {res.text}")
+                    logger.warning(
+                        f"⚠️ Attempt {attempt} failed: {res.status_code} - {res.text}"
+                    )
             except (Timeout, ConnectionError, RequestException) as e:
                 logger.warning(f"⚠️ Attempt {attempt} error: {e}")
             time.sleep(delay)

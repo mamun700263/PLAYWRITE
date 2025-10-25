@@ -3,9 +3,10 @@ import os, csv, json, sqlite3, pandas as pd
 from typing import Optional, List, Dict
 
 from pathlib import Path
+from core import Logger
 
-from  app.utils import Logger
-logger = Logger.get_logger(__name__,'Data Exporters')
+logger = Logger.get_logger(__name__, "Data Exporters")
+
 
 class FileSaver:
 
@@ -23,11 +24,17 @@ class FileSaver:
         if ext in FileSaver.VALID_EXTENSIONS:
             return FileSaver.VALID_EXTENSIONS[ext]
         else:
-            raise ValueError(f"❌ Invalid file extension: {ext}. Supported: {list(FileSaver.VALID_EXTENSIONS.keys())}")
-
+            raise ValueError(
+                f"❌ Invalid file extension: {ext}. Supported: {list(FileSaver.VALID_EXTENSIONS.keys())}"
+            )
 
     @staticmethod
-    def save(items: list[dict[str: str]], file_name: Optional[str], table_name:Optional[str] ="products", mode: str = 'overwrite'):
+    def save(
+        items: list[dict[str:str]],
+        file_name: Optional[str],
+        table_name: Optional[str] = "products",
+        mode: str = "overwrite",
+    ):
         if not items:
             logger.warning("⚠️ No items to save.")
             return
@@ -37,10 +44,12 @@ class FileSaver:
             logger.warning("⚠️ No file name provided and no API endpoint.")
 
     @staticmethod
-    def _save_to_file(file_name: str, items: list[dict[str: str]], table_name: str, mode: str):
-        # ext = os.path.splitext(file_name)[1][1:].lower()
+    def _save_to_file(
+        file_name: str, items: list[dict[str:str]], table_name: str, mode: str
+    ):
         ext = FileSaver.check_format(file_name)
-        if mode=='overwrite': mode= 'save'
+        if mode == "overwrite":
+            mode = "save"
         method_name = f"_{mode}_{ext}"
         logger.info(method_name)
         method = getattr(FileSaver, method_name, None)
@@ -70,7 +79,7 @@ class FileSaver:
             file_exists = os.path.isfile(file_name)
             with open(file_name, mode="a", newline="", encoding="utf-8") as f:
                 writer = csv.DictWriter(f, fieldnames=items[0].keys())
-                
+
                 if not file_exists:
                     writer.writeheader()
                 writer.writerows(items)
@@ -78,7 +87,6 @@ class FileSaver:
             logger.info(f"➕ Appended {len(items)} rows to CSV: {file_name}")
         except Exception as e:
             logger.error(f"❌ Failed to append to CSV: {e}")
-
 
     @staticmethod
     def _save_json(file_name, items: List[Dict[str, str]]):
@@ -89,12 +97,14 @@ class FileSaver:
         except Exception as e:
             logger.error(f"❌ Failed to save JSON: {e}")
 
-
     @staticmethod
     def _append_json(file_name, items: List[Dict[str, str]]):
         try:
-            if  Path(file_name).exists():
-                with open(file_name, 'r', ) as f:
+            if Path(file_name).exists():
+                with open(
+                    file_name,
+                    "r",
+                ) as f:
                     try:
                         existing_data = json.load(f)
                         if not isinstance(existing_data, list):
@@ -105,14 +115,12 @@ class FileSaver:
                 existing_data = []
             existing_data.extend(items)
 
-            with open(file_name, 'w', encoding='utf-8')as f:
+            with open(file_name, "w", encoding="utf-8") as f:
                 json.dump(existing_data, f, ensure_ascii=False, indent=4)
             logger.info(f"➕ Appended {len(items)} items to JSON: {file_name}")
-            
+
         except Exception as e:
             logger.error(f"❌ Failed to append to JSON:{e}")
-
-
 
     @staticmethod
     def _save_excel(file_name, items: List[Dict[str, str]]):
@@ -132,11 +140,13 @@ class FileSaver:
             new_df = pd.DataFrame(items)
             if not existing_data.empty:
                 if set(existing_data.columns) != set(new_df.columns):
-                    logger.warning("⚠️ Column mismatch between existing and new Excel data.")
-   
-            data_f = pd.concat([existing_data,new_df],ignore_index=True)
+                    logger.warning(
+                        "⚠️ Column mismatch between existing and new Excel data."
+                    )
 
-            data_f.to_excel(file_name, index= False)
+            data_f = pd.concat([existing_data, new_df], ignore_index=True)
+
+            data_f.to_excel(file_name, index=False)
             logger.info(f"➕ Appended {len(new_df)} rows to Excel: {file_name}")
 
         except Exception as e:
@@ -155,7 +165,9 @@ class FileSaver:
                 for item in items:
                     placeholders = ", ".join(["?"] * len(item))
                     values = tuple(item.values())
-                    cursor.execute(f"INSERT INTO {table_name} VALUES ({placeholders})", values)
+                    cursor.execute(
+                        f"INSERT INTO {table_name} VALUES ({placeholders})", values
+                    )
                 conn.commit()
                 logger.info(f"✅ Data saved to SQLite: {file_name} → {table_name}")
         except Exception as e:
@@ -173,7 +185,9 @@ class FileSaver:
 
                 # Create table if not exists
                 schema_cols = ", ".join([f"{key} TEXT" for key in items[0].keys()])
-                cursor.execute(f"CREATE TABLE IF NOT EXISTS {table_name} ({schema_cols})")
+                cursor.execute(
+                    f"CREATE TABLE IF NOT EXISTS {table_name} ({schema_cols})"
+                )
 
                 # Insert each row
                 for item in items:
@@ -184,16 +198,18 @@ class FileSaver:
 
                     cursor.execute(
                         f"INSERT INTO {table_name} ({col_names}) VALUES ({placeholders})",
-                        values
+                        values,
                     )
 
                 conn.commit()
-                logger.info(f"✅ Appended {len(items)} rows to SQLite table '{table_name}' in file '{file_name}'")
+                logger.info(
+                    f"✅ Appended {len(items)} rows to SQLite table '{table_name}' in file '{file_name}'"
+                )
         except Exception as e:
             logger.error(f"❌ Failed to append to SQLite: {e}")
 
 
-# this file needs to be refactor in the future 
+# this file needs to be refactor in the future
 # 📦 data_exporters/
 # ├── base.py            🔹 Abstract interface: save(), append()
 # ├── csv_saver.py       🔹 CSV-specific logic

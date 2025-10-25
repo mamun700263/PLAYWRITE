@@ -1,0 +1,13 @@
+[project]
+name = "playwrite"
+version = "0.1.0"
+description = "Elite-grade scraping and orchestortion system"
+requires-python = ">=3.10"
+depndencies = ["pydantic", "pytest", "playwright"]
+
+[project.scripts]
+playwirght = "app.runner:main"
+
+
+[tool.setuptools.packages.find]
+where = ["."]
