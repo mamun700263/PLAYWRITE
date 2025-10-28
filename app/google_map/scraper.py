@@ -23,13 +23,10 @@ async def scraper(search: str):
             headless=True, slow_mo=150, args=["--start-maximized"]
         )
         context = await browser.new_context()
-
         page = await context.new_page()
-
         target_url = search_query(search)
         logger.info(f"going to {target_url}")
         await page.goto(target_url, timeout=60000, wait_until="domcontentloaded")
-
         await consent_pop_up(page, logger)
         await page.wait_for_timeout(5000)
         # await scrolling_map_search(

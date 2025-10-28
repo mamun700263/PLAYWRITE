@@ -1,34 +1,43 @@
-# Use the same Python version you run locally (you used 3.13). If not available, fallback to 3.11.
+# ---------- Base layer ----------
 FROM python:3.13-slim
 
-# Non-root user creation for safety (optional but recommended)
-ARG USER=appuser
-ARG UID=1000
-RUN addgroup --system $USER && adduser --system --ingroup $USER --uid $UID $USER
+# Disable Python output buffering (so logs show instantly)
+ENV PYTHONUNBUFFERED=1
 
-WORKDIR /app
-
-# System deps (adjust if Playwright required). Keep image lean.
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
+# ---------- Install system dependencies ----------
+RUN apt-get update && apt-get install -y \
     curl \
+    wget \
     git \
+    libnss3 \
+    libatk1.0-0 \
+    libatk-bridge2.0-0 \
+    libcups2 \
+    libdrm2 \
+    libxkbcommon0 \
+    libxcomposite1 \
+    libxrandr2 \
+    libxdamage1 \
+    libgbm1 \
+    libpango-1.0-0 \
+    libasound2 \
+    fonts-liberation \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy dependency spec first for caching
-COPY requirements.txt /app/requirements.txt
-RUN pip install --upgrade pip setuptools wheel
-RUN pip install --no-cache-dir -r /app/requirements.txt
+# ---------- Set working directory ----------
+WORKDIR /app
 
-# If you need Playwright in container, uncomment below:
-# RUN pip install playwright
-# RUN playwright install --with-deps chromium
+# ---------- Copy dependency list ----------
+COPY requirements.txt .
 
-# Copy code
-COPY . /app
+# ---------- Install Python dependencies ----------
+RUN pip install --upgrade pip && pip install -r requirements.txt
 
-# Use non-root user
-USER $USER
+# ---------- Copy source code ----------
+COPY . .
 
-# Default command for web service (overridden by compose for run types)
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# ---------- Install browsers inside container ----------
+RUN playwright install --with-deps chromium
+
+# ---------- Command to start scraper ----------
+CMD ["python3", "app/runner.py"]

@@ -1,4 +1,3 @@
-from app.core.cleaning import DataCleaning
 from app.models import GoogleMapSearch
 
 
@@ -10,17 +9,17 @@ async def extract_card(card: str):
     spans = await card.query_selector_all("div.UaQhfb div.W4Efsd div.W4Efsd span")
     type_of_place = await spans[0].text_content()
 
-    print(len(spans))
-    x = 0
-    for i in spans:
-        t = await i.text_content()
-        print(x, t)
-        x += 1
-    print(t)
+    # print(len(spans))
+    # x = 0
+    # for i in spans:
+    #     t = await i.text_content()
+    #     print(x, t)
+    #     x += 1
+    # print(t)
 
     if spans:
         try:
-            address = await spans[2].text_content()
+            address = await spans[6].text_content()
             # if address.size() < 2:
             #     address = await spans[6].text_content()
             # else:
@@ -33,10 +32,8 @@ async def extract_card(card: str):
     name = await anchor.get_attribute("aria-label") if anchor else None
     href = await anchor.get_attribute("href") if anchor else None
     img = await img_el.get_attribute("src") if img_el else None
-    rating_raw = await rating_el.text_content() if rating_el else None
-    rating = DataCleaning.clean_rating(rating_raw)
-    reviews_raw = await reviews_el.text_content() if reviews_el else None
-    reviews = DataCleaning.clean_review(reviews_raw)
+    rating = await rating_el.text_content() if rating_el else None
+    reviews = await reviews_el.text_content() if reviews_el else None
     price_rage = ""
     status = ""
 
