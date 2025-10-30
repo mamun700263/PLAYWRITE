@@ -1,5 +1,25 @@
 from app.models import GoogleMapSearch
 
+def valid_address(address: str) -> bool:
+    invalid_words = ["Open", "Closed", ".","Closes"]
+    address.strip()
+    return len(address) > 2 and not any(word in address for word in invalid_words) and not address == " · "
+
+
+async def extract_address(spans: list, index: int = 0) -> str | None:
+    target_indexes = [6,8,2]
+    if index >= len(target_indexes):
+        return None
+
+    address = None
+    if spans and target_indexes[index] < len(spans):
+        address = await spans[target_indexes[index]].text_content()
+
+    if address and valid_address(address):
+        return address
+
+    return await extract_address(spans, index + 1)
+
 
 async def extract_card(card: str):
     anchor = await card.query_selector("a")
@@ -9,23 +29,8 @@ async def extract_card(card: str):
     spans = await card.query_selector_all("div.UaQhfb div.W4Efsd div.W4Efsd span")
     type_of_place = await spans[0].text_content()
 
-    # print(len(spans))
-    # x = 0
-    # for i in spans:
-    #     t = await i.text_content()
-    #     print(x, t)
-    #     x += 1
-    # print(t)
-
     if spans:
-        try:
-            address = await spans[6].text_content()
-            # if address.size() < 2:
-            #     address = await spans[6].text_content()
-            # else:
-            #     address = await spans.text_content()
-        except:
-            address = None
+        address = await extract_address(spans,0)
     else:
         address = None
 

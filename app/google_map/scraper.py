@@ -29,9 +29,9 @@ async def scraper(search: str):
         await page.goto(target_url, timeout=60000, wait_until="domcontentloaded")
         await consent_pop_up(page, logger)
         await page.wait_for_timeout(5000)
-        # await scrolling_map_search(
-        #     page,logger
-        # )
+        await scrolling_map_search(
+            page,logger
+        )
         cards = await get_cards(page, logger)
         print(f"✅ Final count: {len(cards)} cards")
         data = []
