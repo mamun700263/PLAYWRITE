@@ -155,3 +155,8 @@ output/
 # ====== My research ======
 research/
 notebooks/
+
+
+.csv
+.json
+.xlxs

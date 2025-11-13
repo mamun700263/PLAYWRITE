@@ -1,14 +1,15 @@
 from app.core import Logger
 from app.core.data_exporters import FileSaver
 from app.google_map.scraper import scraper
-from app.celery import celery_app
+from app.core.celery import celery_app
 
 logger = Logger.get_logger(__file__,'google_map')
 @celery_app.task(bind=True,name="map scraper")
-async def run_scraper(self,query: str, file_name: str):
+def run_scraper(self,query: str, file_name: str):
+    logger.info(f"started search for : {query} and file saving as {file_name}")
     try:
         logger.info(f"Starting scrape for: {query}")
-        data = await scraper(query)
+        data =scraper(query)
         FileSaver.save(data, f"{file_name}")
         logger.info(f"[SUCCESS] Saved results to {file_name}")
         return data
