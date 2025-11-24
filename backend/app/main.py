@@ -6,8 +6,11 @@ app = FastAPI(
     version="1.0",
 )
 
-app.include_router(google_map_scrapper_router,prefix="/google_map_scrapper", tags=["Scraper"])
+app.include_router(
+    google_map_scrapper_router, prefix="/google_map_scrapper", tags=["Scraper"]
+)
+
 
 @app.get("/")
 def root():
-    return {"status":"ok", "message":"Playwrite API online"}
+    return {"status": "ok", "message": "Playwrite API online"}

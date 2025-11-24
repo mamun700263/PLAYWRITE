@@ -10,10 +10,7 @@ BROKER_URL = os.getenv("CELERY_BROKER_URL")
 RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND")
 
 celery_app = Celery(
-    "playwrite_tasks",
-    broker=BROKER_URL,
-    backend=RESULT_BACKEND,
-    include=["app.tasks"]
+    "playwrite_tasks", broker=BROKER_URL, backend=RESULT_BACKEND, include=["app.tasks"]
 )
 
 celery_app.conf.update(

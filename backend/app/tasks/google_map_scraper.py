@@ -3,10 +3,9 @@ from app.core import Logger
 from app.scrapers.google_map import scraper
 from app.core.celery import celery_app
 from app.core.data_exporters import FileSaver
-logger = Logger.get_logger(__file__, 'google_map')
+
+logger = Logger.get_logger(__file__, "google_map")
 logger.info("logger on")
-
-
 
 
 @celery_app.task(bind=True, name="map_scraper")

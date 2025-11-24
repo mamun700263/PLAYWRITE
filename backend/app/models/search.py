@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field, field_validator
 from datetime import datetime
 from typing import Optional
 
+
 class GoogleMapSearch(BaseModel):
     name: str
     type: Optional[str] = None

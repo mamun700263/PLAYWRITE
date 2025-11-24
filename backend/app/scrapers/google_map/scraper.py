@@ -18,7 +18,7 @@ def search_query(sentence: str, laguage: str = "en"):
 
 
 async def scraper(search: str):
-    logger.info('scraper on ')
+    logger.info("scraper on ")
     async with async_playwright() as p:
         browser = await p.chromium.launch(
             headless=False, slow_mo=150, args=["--start-maximized"]
@@ -30,9 +30,7 @@ async def scraper(search: str):
         await page.goto(target_url, timeout=60000, wait_until="domcontentloaded")
         await consent_pop_up(page, logger)
         await page.wait_for_timeout(5000)
-        await scrolling_map_search(
-            page,logger
-        )
+        await scrolling_map_search(page, logger)
         cards = await get_cards(page, logger)
         logger.info(f"✅ Final count: {len(cards)} cards")
         data = []

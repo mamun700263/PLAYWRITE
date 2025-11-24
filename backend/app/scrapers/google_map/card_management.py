@@ -1,14 +1,20 @@
 from app.models import GoogleMapSearch
 
+
 def valid_address(address: str) -> bool:
     """the .  needs to be removed"""
-    invalid_words = ["Open", "Closed", ".","Closes"]
+    invalid_words = ["Open", "Closed", ".", "Closes"]
     address.strip()
-    return len(address) > 2 and not any(word in address for word in invalid_words) and not address == " · "
-
+    return (
+        len(address) > 2
+        and not any(word in address for word in invalid_words)
+        and not address == " · "
+    )
+def clean_address(address:str):
+    return address[3:]
 
 async def extract_address(spans: list, index: int = 0) -> str | None:
-    target_indexes = [6,8,2]
+    target_indexes = [6, 8, 2]
     if index >= len(target_indexes):
         return None
 
@@ -17,10 +23,9 @@ async def extract_address(spans: list, index: int = 0) -> str | None:
         address = await spans[target_indexes[index]].text_content()
 
     if address and valid_address(address):
-        return address[2:]
+        return clean_address(address)
 
     return await extract_address(spans, index + 1)
-
 
 
 async def extract_card(card: str):
@@ -32,7 +37,7 @@ async def extract_card(card: str):
     type_of_place = await spans[0].text_content()
 
     if spans:
-        address = await extract_address(spans,0)
+        address = await extract_address(spans, 0)
     else:
         address = None
 
